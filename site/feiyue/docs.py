@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
+import yaml
 from jinja2 import Environment, FileSystemLoader
 from pypinyin import lazy_pinyin
 
@@ -86,9 +87,17 @@ class MkDocs:
             for university in universities:
                 university["programs"].sort(key=lambda p: p["display_value"])  # Sort by program abbreviation
 
+        # Optional standalone articles (专栏), single source of truth in data/articles.yaml
+        articles_path = WORKING_DIR / "data" / "articles.yaml"
+        articles = []
+        if articles_path.exists():
+            with open(articles_path) as f:
+                articles = yaml.safe_load(f) or []
+
         self.env = Environment(loader=FileSystemLoader(self.templates_dir))
         self.env.globals.update({  # Jinja global variables
             "current_year": datetime.now().year,
+            "articles": articles,
             "universities": self.universities,
             "programs": self.programs,
             "students": self.students,

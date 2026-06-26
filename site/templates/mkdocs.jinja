@@ -96,6 +96,10 @@ nav:
     - index.md
   - Prefaces:
     - 前言 2026: prefaces/preface-2026.md
+  - Articles:
+{%- for a in articles %}
+    - {{ a.title }}: articles/{{ a.slug }}.md
+{%- endfor %}
   - Applicants:
     - applicants/index.md
     - Term:

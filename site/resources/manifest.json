@@ -1,5 +1,6 @@
 {
   "overrides": "overrides",
   "prefaces": "docs/prefaces",
+  "articles": "docs/articles",
   "stylesheets": "docs/stylesheets"
 }

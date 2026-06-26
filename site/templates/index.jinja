@@ -46,6 +46,20 @@ hide:
     - 本平台内容由诺丁汉大学数学系学生自愿提供并经整理。所涉及的所有申研观点仅代表内容提供者的个人观点，不代表本项目组、院系或学校的立场。请各位读者带着批判性思维阅读。
     - 为最大限度保护隐私，内容提供者可对部分信息进行模糊化或选择性披露。本平台仅展示用户明确同意公开的信息，但仍无法完全保证个人信息免于被他人出于商业或其它目的利用。
 
+## 专栏 Article
+
+<div class="grid cards" markdown>
+{% for a in articles %}
+-   :{{ a.icon | default('material-text-box-outline', true) }}: __{{ a.title }}__
+
+    ---
+
+    {{ a.desc }}
+
+    [阅读全文:octicons-chevron-right-24:](articles/{{ a.slug }}.md)
+{% endfor %}
+</div>
+
 ## 致谢 Acknowledgements
 
 本平台的网页与数据结构参考了 <a href="https://github.com/UNNC-feiyue/docs-cs" target="_blank">宁波诺丁汉大学计算机系飞跃手册:octicons-arrow-up-right-24:</a>，并在此基础上结合数学系问卷数据搭建。

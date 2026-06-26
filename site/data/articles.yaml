@@ -1,0 +1,16 @@
+# 专栏文章清单 —— 首页「专栏 Article」卡片与导航的单一数据源。
+# 新增一篇专栏：在此加一条，并在 resources/articles/<slug>.md 写正文即可，无需改模板。
+# 卡片样式与「手册导览 Site Map」一致（Material grid cards：图标 + 标题 + 简介 + 链接）。
+# 字段：
+#   slug   文件名 / URL（对应 resources/articles/<slug>.md）
+#   title  卡片与导航标题
+#   desc   卡片简介
+#   icon   Material/Octicons 图标名（不含两侧冒号），如 material-hammer-screwdriver
+- slug: diy-application
+  title: DIY 申请心得
+  desc: 不依赖中介，自己 DIY 完成全套申请的经验合集。
+  icon: material-hammer-screwdriver
+- slug: baoyan
+  title: 保研专题
+  desc: 国内保研路径、夏令营与预推免经验。
+  icon: material-certificate-outline
