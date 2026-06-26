@@ -32,6 +32,8 @@ PLAN.md
 
 # Exported survey data (contains personal contact info — never commit)
 survey_data_by_user_*.xlsx
+# Excel lock/temp files
+~$*.xlsx
 
 # Generated site artifacts (reproducible)
 site/.cache/
