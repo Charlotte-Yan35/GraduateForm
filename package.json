@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "export": "/opt/miniconda3/bin/python scripts/export_survey.py"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
