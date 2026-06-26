@@ -24,6 +24,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TERM = "26Fall"
 SENTINEL_PID = "p_undecided"
 
+# 测试账户: 这些 q1 姓名代号不纳入站点(大小写/首尾空白不敏感)
+EXCLUDED_NAMES = {"企鹅", "tr. test"}
+
 MAJOR_MAP = {
     "math_2p2": "数学与应用数学 (2+2)",
     "math_4p0": "数学与应用数学 (4+0)",
@@ -101,6 +104,7 @@ class Deriver:
         self.applications: dict = {}
         self.program_univ: dict = {}  # p_id -> {name, abbrv, region}(内部用, 不入表)
         self.skipped_schools = 0
+        self.skipped_tests = 0
         self.unresolved_dest = 0
         # 哨兵项目: 去向未定。放入 programs 但不挂到任何 University。
         self.programs[SENTINEL_PID] = {
@@ -223,6 +227,9 @@ class Deriver:
 
     def add_student(self, row: dict) -> None:
         d = row.get("draft") or {}
+        if (d.get("q1") or "").strip().lower() in EXCLUDED_NAMES:
+            self.skipped_tests += 1
+            return
         s_id = _hash_id("s", row["user_id"])
         degree_codes = d.get("q5") or []
 
@@ -318,7 +325,8 @@ def get_records(source: str = "cloud") -> tuple[list[dict], dict]:
           f"{len(deriver.universities)} universities, "
           f"{len([p for p in deriver.programs if p != SENTINEL_PID])} programs, "
           f"{len(deriver.applications)} applications "
-          f"(skipped {deriver.skipped_schools} entries with unusable school)")
+          f"(skipped {deriver.skipped_schools} entries with unusable school, "
+          f"{deriver.skipped_tests} test account row(s))")
 
     save_to_cache("University.json", deriver.universities)
     save_to_cache("Program.json", deriver.programs)
