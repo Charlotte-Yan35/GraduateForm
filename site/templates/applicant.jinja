@@ -23,6 +23,8 @@
 
 ## 申请结果 Application Results
 
+<div class="app-results" markdown>
+
 | 项目 | 结果 | 提交日期 | 结果日期 | 备注 |
 | --- | --- | --- | --- | --- |
 {%- for application in student.applications %}
@@ -30,6 +32,8 @@
 {%- set program = programs[application.program[0].row_id] %}
 | {{ loop.index }}. [{{ program.abbrv }}](../programs/{{ program.p_id }}.md) | {{ status[application.result] }} | {{ application.submit_date or "" }} | {{ application.result_date or "" }} | {{ application.note or "" }} |
 {%- endfor %}
+
+</div>
 
 {{ student.experience }}
 

@@ -30,3 +30,32 @@ small {
 .md-typeset__table table th:first-child {
   white-space: nowrap;
 }
+
+/* 申请结果表: 固定布局, 永不超出页宽(不横向滚动);
+   学校列窄且换行, 备注列加宽。覆盖上面的首列 nowrap。 */
+.app-results .md-typeset__table,
+.app-results table {
+  width: 100% !important;
+}
+
+.app-results table {
+  table-layout: fixed;
+}
+
+.app-results table th,
+.app-results table td {
+  white-space: normal !important;   /* 覆盖首列 nowrap, 允许换行 */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.app-results table th:nth-child(1),
+.app-results table td:nth-child(1) { width: 24%; }   /* 项目 / 学校 */
+.app-results table th:nth-child(2),
+.app-results table td:nth-child(2) { width: 9%;  }   /* 结果 */
+.app-results table th:nth-child(3),
+.app-results table td:nth-child(3) { width: 12%; }   /* 提交日期 */
+.app-results table th:nth-child(4),
+.app-results table td:nth-child(4) { width: 12%; }   /* 结果日期 */
+.app-results table th:nth-child(5),
+.app-results table td:nth-child(5) { width: 43%; }   /* 备注 */
