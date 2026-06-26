@@ -15,6 +15,6 @@
 | --- | --- | --- | --- | --- | --- |
 {%- for application in applications %}
 {%- set student = students[application.student[0].row_id] %}
-| {{ loop.index }}. [{{ student.name }}](../applicants/{{ student.s_id }}.md) | {{ student.gpa or "" }} | {{ student.lang or "" }} | {{ student.gre or "" }} | {{ status[application.result] }} | {{ application.result_date or "" }} |
+| {{ loop.index }}. [{{ student.name }}](../applicants/{{ student.s_id }}.md) | {{ [student.gpa, ("GPA " ~ student.gpa4) if student.gpa4 else ""] | select | join(" / ") }} | {{ student.lang or "" }} | {{ student.gre or "" }} | {{ status[application.result] }} | {{ application.result_date or "" }} |
 {%- endfor %}
 {% endfor %}

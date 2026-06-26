@@ -294,9 +294,8 @@ class Deriver:
         prefer = [FIELD_MAP.get(x, x) for x in (d.get("q6") or [])]
         if d.get("q6_other_text"):
             prefer = [p for p in prefer if p != "其他"] + [d["q6_other_text"]]
-        gpa = d.get("q10_gpa_pct", "") or ""
-        if d.get("q10_gpa_4"):
-            gpa = f"{gpa} / GPA {d['q10_gpa_4']}".strip(" /")
+        gpa = d.get("q10_gpa_pct", "") or ""    # 百分制三年均分
+        gpa4 = d.get("q10_gpa_4", "") or ""     # 4.0 制 GPA
 
         self.students[s_id] = {
             "_id": s_id, "s_id": s_id, "name": d.get("q1") or "匿名",
@@ -305,6 +304,7 @@ class Deriver:
             "apply_degree": "、".join(DEGREE_MAP.get(x, x) for x in degree_codes),
             "prefer_field": "、".join(prefer),
             "gpa": gpa,
+            "gpa4": gpa4,
             "lang": d.get("q10_language", "") or "",
             "gre": d.get("q10_gre", "") or "",
             "program_choice": [choice],
