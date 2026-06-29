@@ -17,7 +17,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 UNIVERSITIES_JS = REPO_ROOT / "src" / "data" / "universities.js"
 SCHOOL_MAP_CSV = Path(__file__).resolve().parents[1] / "data" / "school_map.csv"
-PROGRAM_MAP_CSV = Path(__file__).resolve().parents[1] / "data" / "program_map.csv"
+PROGRAM_ALIASES_CSV = Path(__file__).resolve().parents[1] / "data" / "program_aliases.csv"
+DESTINATION_CSV = Path(__file__).resolve().parents[1] / "data" / "destination.csv"
 
 REGION_MARKERS = {
     "英国": "英国",
@@ -39,25 +40,6 @@ def _alias_key(name: str) -> str:
     s = s.lower()
     s = re.sub(r"[^a-z0-9一-鿿]", "", s)  # 仅留字母数字与中文
     return s
-
-
-_TOKEN_STOPWORDS = {
-    "university", "college", "institute", "school", "the", "of", "and", "in",
-    "for", "at", "polytechnic", "technology", "science", "sciences", "national",
-}
-
-
-def signature_tokens(name: str, abbrv: str = "") -> set[str]:
-    """院校的「特征词」: 名称中去停用词、长度>=4 的词 + 缩写小写。用于把自由文本去向
-    匹配到已知院校(如 'University of Columbia' 命中 'columbia')。"""
-    toks = set()
-    for w in re.findall(r"[a-z]+", name.lower()):
-        if len(w) >= 4 and w not in _TOKEN_STOPWORDS:
-            toks.add(w)
-    ab = re.sub(r"[^a-z]", "", abbrv.lower())
-    if len(ab) >= 3:
-        toks.add(ab)
-    return toks
 
 
 def _extract_abbrv(name: str) -> str:
@@ -165,50 +147,48 @@ class SchoolNormalizer:
 
 
 class ProgramNormalizer:
-    """项目名归并: 把同一项目的不同写法收敛到官方统一名。
+    """项目名权威: 把每条原始录入 (raw_school, raw_project) 精确映射到人工写定的
+    canonical 全名(展示名 = 去重 identity)。
 
-    机制同 SchoolNormalizer: site/data/program_map.csv 是人工归并表,列
-    raw_school 用规范学校名(派生时已规范化), 列 raw_project 是学生原始写法,
-    canonical_program 是官方统一名。匹配键 = (alias(school), alias(raw_project)),
-    故大小写/括号/标点差异都归一。未命中的 (school, raw_project) 追加到表中待人工
-    补全(canonical 留空 = pass-through, 用轻归一后的原串)。
+    数据源 site/data/program_aliases.csv 由人工逐人编纂(correct.xlsx 的 C 列逐字优先,
+    其余按判断/联网核实写定)。匹配键 = (alias(raw_school), alias(raw_project)), 仅做
+    trim/小写/去标点的轻归一, **不做任何 token/模糊匹配**。
+
+    未命中(新提交未编纂)的 (raw_school, raw_project) 追加到表中待人工补全(canonical
+    留空), 调用方回退用旧式 school_abbrv+项目 拼接展示, 保证构建不中断。
     """
 
     def __init__(self):
-        self._overrides: dict[tuple[str, str], str] = {}
+        self._aliases: dict[tuple[str, str], str] = {}
         self._unmatched: set[tuple[str, str]] = set()
-        if PROGRAM_MAP_CSV.exists():
-            with open(PROGRAM_MAP_CSV, encoding="utf-8") as f:
+        if PROGRAM_ALIASES_CSV.exists():
+            with open(PROGRAM_ALIASES_CSV, encoding="utf-8") as f:
                 for row in csv.DictReader(f):
-                    school = (row.get("school") or "").strip()
+                    school = (row.get("raw_school") or "").strip()
                     raw = (row.get("raw_project") or "").strip()
-                    canonical = (row.get("canonical_program") or "").strip()
-                    if not school or not raw or not canonical:
+                    canonical = (row.get("canonical") or "").strip()
+                    if not canonical:
                         continue  # 待补全行(canonical 留空)=pass-through
-                    self._overrides[(_alias_key(school), _alias_key(raw))] = canonical
+                    self._aliases[(_alias_key(school), _alias_key(raw))] = canonical
 
-    def normalize(self, canonical_school: str, raw_project: str) -> str:
-        """返回归并后的项目名;未命中回退轻归一后的原串(并记待审核)。"""
-        proj = normalize_project(raw_project)
-        raw = (raw_project or "").strip()
-        if not raw:
-            return proj
-        key = (_alias_key(canonical_school), _alias_key(raw))
-        if key in self._overrides:
-            return self._overrides[key]
-        self._unmatched.add((canonical_school.strip(), raw))
-        return proj
+    def lookup(self, raw_school: str, raw_project: str) -> str | None:
+        """命中返回人工写定的 canonical 全名;未命中返回 None(并记待审核)。"""
+        key = (_alias_key(raw_school), _alias_key(raw_project))
+        if key in self._aliases:
+            return self._aliases[key]
+        self._unmatched.add(((raw_school or "").strip(), (raw_project or "").strip()))
+        return None
 
     def flush_unmatched(self) -> int:
-        """把未命中的 (school, raw_project) 追加到 program_map.csv 待补全区。"""
+        """把未命中的 (raw_school, raw_project) 追加到 program_aliases.csv 待补全区。"""
         if not self._unmatched:
             return 0
         existing = set()
-        file_exists = PROGRAM_MAP_CSV.exists()
+        file_exists = PROGRAM_ALIASES_CSV.exists()
         if file_exists:
-            with open(PROGRAM_MAP_CSV, encoding="utf-8") as f:
+            with open(PROGRAM_ALIASES_CSV, encoding="utf-8") as f:
                 for row in csv.DictReader(f):
-                    existing.add((_alias_key(row.get("school") or ""),
+                    existing.add((_alias_key(row.get("raw_school") or ""),
                                   _alias_key(row.get("raw_project") or "")))
         new = sorted(
             (s, p) for s, p in self._unmatched
@@ -216,14 +196,33 @@ class ProgramNormalizer:
         )
         if not new:
             return 0
-        PROGRAM_MAP_CSV.parent.mkdir(parents=True, exist_ok=True)
-        with open(PROGRAM_MAP_CSV, "a", encoding="utf-8", newline="") as f:
+        PROGRAM_ALIASES_CSV.parent.mkdir(parents=True, exist_ok=True)
+        with open(PROGRAM_ALIASES_CSV, "a", encoding="utf-8", newline="") as f:
             w = csv.writer(f)
             if not file_exists:
-                w.writerow(["school", "raw_project", "canonical_program"])
+                w.writerow(["raw_school", "raw_project", "canonical"])
             for school, proj in new:
-                w.writerow([school, proj, ""])  # 待人工归并
+                w.writerow([school, proj, ""])  # 待人工编纂
         return len(new)
+
+
+def load_destinations() -> dict[str, dict]:
+    """读 site/data/destination.csv: user_id -> {chosen_canonical, chosen_school}。
+    每个『已定去向』学生一行, 由人工逐人判定(读 q9 + admit 列表后写定)。"""
+    out: dict[str, dict] = {}
+    if not DESTINATION_CSV.exists():
+        return out
+    with open(DESTINATION_CSV, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            uid = (row.get("user_id") or "").strip()
+            canonical = (row.get("chosen_canonical") or "").strip()
+            if not uid or not canonical:
+                continue
+            out[uid] = {
+                "canonical": canonical,
+                "school": (row.get("chosen_school") or "").strip(),
+            }
+    return out
 
 
 # ---- 项目名 / 学位 规范化 ----

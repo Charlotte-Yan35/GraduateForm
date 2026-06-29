@@ -26,6 +26,8 @@ SENTINEL_PID = "p_undecided"
 
 # 测试账户: 这些 q1 姓名代号不纳入站点(大小写/首尾空白不敏感)
 EXCLUDED_NAMES = {"企鹅", "tr. test"}
+# 重复账户: 按 user_id 屏蔽(空 Rosie 草稿, 与真 Rosie 9437367d 同名)
+EXCLUDED_USER_IDS = {"85e7ddbf-f7f4-479c-81ae-d43e407072f0"}
 
 MAJOR_MAP = {
     "math_2p2": "数学与应用数学 (2+2)",
@@ -76,17 +78,6 @@ def _fetch_submitted() -> list[dict]:
 
 # ---- 派生辅助 ----
 
-def _parse_destination(q9_text: str) -> tuple[str, str]:
-    """把 q9_text 拆成 (school, project)。形如 'School（Project）' 或 'School (Project)'。"""
-    s = (q9_text or "").strip()
-    if not s:
-        return "", ""
-    m = re.match(r"^(.*?)[（(]\s*(.+?)\s*[)）]\s*$", s)
-    if m:
-        return m.group(1).strip(), m.group(2).strip()
-    return s, ""
-
-
 def _entries(value) -> list[dict]:
     """规整 q11/q12/q13/q16/q17 的值为 dict 列表(忽略空/字符串遗留项)。"""
     if not isinstance(value, list):
@@ -128,11 +119,11 @@ class Deriver:
     def __init__(self):
         self.norm = normalize.SchoolNormalizer()
         self.prognorm = normalize.ProgramNormalizer()
+        self.destinations = normalize.load_destinations()  # user_id -> {canonical, school}
         self.universities: dict = {}
         self.programs: dict = {}
         self.students: dict = {}
         self.applications: dict = {}
-        self.program_univ: dict = {}  # p_id -> {name, abbrv, region}(内部用, 不入表)
         self.skipped_schools = 0
         self.skipped_tests = 0
         self.unresolved_dest = 0
@@ -143,107 +134,60 @@ class Deriver:
             "level": "", "name": "尚未确定最终去向",
         }
 
-    def _get_or_create_program(self, raw_school: str, raw_project: str, degree_codes: list) -> str | None:
-        info = self.norm.normalize(raw_school)
-        if info is None:
-            self.skipped_schools += 1
-            return None
-        project = self.prognorm.normalize(info["name"], raw_project)
+    def _ensure_program_node(self, info: dict, canonical: str, degree_codes: list) -> str:
+        """以 canonical 全名为 identity 建/取 program 节点, 挂到 info 对应的 University。
+        canonical 即展示名(program.abbrv); 相同 canonical → 同一节点(正确合并)。"""
         u_id = _hash_id("u", info["name"])
-        p_id = _hash_id("p", info["name"], project)
-
-        # University
+        p_id = _hash_id("p", canonical)
         if u_id not in self.universities:
             self.universities[u_id] = {
                 "_id": u_id, "name": info["name"], "abbrv": info["abbrv"],
                 "region": info["region"], "programs": [],
             }
-        # Program
         if p_id not in self.programs:
-            level = normalize.derive_level(project, degree_codes)
-            label = normalize.program_label(project, level)  # 学位+项目名(无学校), 去重
-            abbrv = f"{info['abbrv']} {label}".strip() if project else info["name"]
+            level = normalize.derive_level(canonical, degree_codes)
             self.programs[p_id] = {
-                "_id": p_id, "p_id": p_id, "abbrv": abbrv,
-                "label": label, "level": level, "name": project or "—",
+                "_id": p_id, "p_id": p_id, "abbrv": canonical,
+                "label": canonical, "level": level, "name": canonical,
             }
-            self.program_univ[p_id] = info
             self.universities[u_id]["programs"].append(
-                {"row_id": p_id, "display_value": abbrv}
+                {"row_id": p_id, "display_value": canonical}
             )
         return p_id
 
-    def _identify_dest_univ(self, q9: str, key: str, app_refs: list):
-        """识别去向所属大学, 返回规范 info({name,abbrv,region}) 或 None。
-        颗粒度: 只用特征词把去向定位到「大学」(不再据此抓某条具体项目)。
-        (a) 优先匹配该生自己申请记录所涉大学(取最长 token 命中那所);
-        (b) 否则解析 q9 的 school 段, 走 school_map / universities.js 规范化。"""
-        best_info, best_len = None, 0
-        for ref in app_refs:
-            info = self.program_univ.get(self.applications[ref["row_id"]]["program"][0]["row_id"])
-            if not info:
-                continue
-            hits = [t for t in normalize.signature_tokens(info["name"], info["abbrv"]) if t in key]
-            if hits:
-                longest = max(len(t) for t in hits)
-                if longest > best_len:
-                    best_info, best_len = info, longest
-        if best_info:
-            return best_info
-        dschool, _ = _parse_destination(q9)
-        if dschool:
-            info = self.norm.normalize(dschool)
-            if info and info["region"] != normalize.OTHER_REGION:
-                return info
-        return None
-
-    def _strip_school(self, q9: str, info: dict) -> str:
-        """从 q9 原文剥去已识别大学的规范名/基名/缩写(大小写不敏感), 余下作项目段。"""
-        base = re.sub(r"\s*[（(].*?[)）]\s*", "", info["name"]).strip()  # 去括号缩写后的主名
-        out = q9
-        for needle in sorted({info["name"], base, info["abbrv"]}, key=len, reverse=True):
-            if needle:
-                out = re.sub(re.escape(needle), " ", out, flags=re.IGNORECASE)
-        return re.sub(r"\s+", " ", out).strip(" -–—,，、")
-
-    def _resolve_destination(self, d: dict, app_refs: list, degree_codes: list):
-        """返回去向项目 p_id 或 None(→哨兵)。先定校、再定项目: 同校 Admit 项目词元
-        显著重合则复用其 p_id(避免近似重复条目), 否则按去向项目段新建。"""
-        q9 = (d.get("q9_text") or "").strip()
-        if not q9:
-            return None
-        key = normalize._alias_key(q9)
-
-        info = self._identify_dest_univ(q9, key, app_refs)
+    def _get_or_create_program(self, raw_school: str, raw_project: str, degree_codes: list) -> str | None:
+        info = self.norm.normalize(raw_school)
         if info is None:
-            # 无法定位院校: 计入待审核(normalize 已自动 flush), 回退哨兵
+            self.skipped_schools += 1
+            return None
+        canonical = self.prognorm.lookup(raw_school, raw_project)
+        if canonical is None:
+            # 未编纂(新提交): 回退旧式 school_abbrv + 项目 拼接, 不阻断构建; 已记待补全
+            project = normalize.normalize_project(raw_project)
+            if project:
+                level = normalize.derive_level(project, degree_codes)
+                label = normalize.program_label(project, level)
+                canonical = f"{info['abbrv']} {label}".strip()
+            else:
+                canonical = info["name"]
+        return self._ensure_program_node(info, canonical, degree_codes)
+
+    def _resolve_destination(self, user_id: str, degree_codes: list) -> str | None:
+        """返回去向 program p_id 或 None(→哨兵)。完全靠人工编纂的 destination.csv:
+        chosen_canonical 已写定; 节点若不存在则按 chosen_school 建。不做任何启发式。"""
+        entry = self.destinations.get(user_id)
+        if not entry:
             self.unresolved_dest += 1
             return None
-
-        dproject = self._strip_school(q9, info)
-        dtokens = normalize.signature_tokens(dproject)
-
-        # 细匹配: 同校 Admit 项目词元显著重合 → 复用
-        same_admits = []
-        for ref in app_refs:
-            app = self.applications[ref["row_id"]]
-            if app["result"] != "Admit":
-                continue
-            p_id = app["program"][0]["row_id"]
-            pinfo = self.program_univ.get(p_id)
-            if not pinfo or pinfo["name"] != info["name"]:
-                continue
-            same_admits.append(p_id)
-            if dtokens and (dtokens & normalize.signature_tokens(self.programs[p_id]["name"])):
-                return p_id
-
-        # 同校恰有一条 Admit: 无歧义(去向必是它), 复用之 —— 即便 q9 只给学校名或换了
-        # 项目措辞(如校区名)。多条 Admit 但无词元命中, 或同校无 Admit(去向未记录为录取,
-        # 如 CRN), 才按去向项目段新建。
-        if len(same_admits) == 1:
-            return same_admits[0]
-
-        return self._get_or_create_program(info["name"], dproject, degree_codes)
+        canonical = entry["canonical"]
+        p_id = _hash_id("p", canonical)
+        if p_id not in self.programs:
+            info = self.norm.normalize(entry["school"])
+            if info is None:
+                self.unresolved_dest += 1
+                return None
+            self._ensure_program_node(info, canonical, degree_codes)
+        return p_id
 
     def _build_contact(self, d: dict) -> str:
         """联系方式: 仅 q2='1'(公开) 才展示, 与 q15(经历意愿)无关。"""
@@ -304,7 +248,8 @@ class Deriver:
 
     def add_student(self, row: dict) -> None:
         d = row.get("draft") or {}
-        if (d.get("q1") or "").strip().lower() in EXCLUDED_NAMES:
+        if (d.get("q1") or "").strip().lower() in EXCLUDED_NAMES \
+                or row.get("user_id") in EXCLUDED_USER_IDS:
             self.skipped_tests += 1
             return
         s_id = _hash_id("s", row["user_id"])
@@ -337,7 +282,7 @@ class Deriver:
         # 最终去向 program_choice (恒存在)
         dest_pid = None
         if d.get("q9_status") == "decided":
-            dest_pid = self._resolve_destination(d, app_refs, degree_codes)
+            dest_pid = self._resolve_destination(row["user_id"], degree_codes)
 
         if dest_pid:
             # 去向恒作为 Chosen 进入「申请结果」: 已有同项目记录则升级(优先 Admit),
@@ -427,6 +372,8 @@ def get_records(source: str = "cloud") -> tuple[list[dict], dict]:
         print(f"[ACTION] {n} new school name(s) need review in site/data/school_map.csv")
     np = deriver.prognorm.flush_unmatched()
     if np:
-        print(f"[ACTION] {np} new program name(s) flushed to site/data/program_map.csv for optional merge review")
+        print(f"[ACTION] {np} new program entry(ies) flushed to site/data/program_aliases.csv — author canonical name(s)")
+    if deriver.unresolved_dest:
+        print(f"[ACTION] {deriver.unresolved_dest} decided destination(s) not in destination.csv — author chosen_canonical")
 
     return [deriver.universities, deriver.programs, deriver.students, deriver.applications], {}

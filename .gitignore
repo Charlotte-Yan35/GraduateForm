@@ -34,6 +34,7 @@ PLAN.md
 survey_data_by_user_*.xlsx
 # Excel lock/temp files
 ~$*.xlsx
+*.xlsx
 
 # Generated site artifacts (reproducible)
 site/.cache/
