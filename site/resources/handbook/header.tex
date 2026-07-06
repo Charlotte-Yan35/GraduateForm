@@ -1,0 +1,8 @@
+% XeLaTeX header-includes for the 升学指导手册 PDF (pandoc --include-in-header).
+% CJK 字体由 pandoc 的 CJKmainfont 变量装载(会 \usepackage{xeCJK} + \setCJKmainfont),此处不重复。
+\usepackage{xurl}                 % 长 URL 自动换行,避免溢出页边
+\setcounter{secnumdepth}{-1}      % 关闭章节编号,手册按标题+目录页码导航,避免 unnumbered 章下的 "0.1" 伪编号
+\emergencystretch=3em             % 缓解 overfull hbox(长串不可断字符)
+\setlength{\parindent}{0pt}       % 段首不缩进
+\setlength{\parskip}{0.5em}       % 段间距
+\raggedbottom                     % 允许页面底部留白,避免过度拉伸

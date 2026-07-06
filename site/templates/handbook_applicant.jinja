@@ -1,0 +1,36 @@
+# {{ student.program_choice[0].display_value }} – {{ student.name }}
+
+## 基本信息
+
+本科专业：{{ student.major }}
+
+申请学位：{{ student.apply_degree }}
+
+领域偏好：{{ student.prefer_field }}
+
+最终去向：{{ student.program_choice[0].display_value }}
+{% if student.contact %}
+联系方式：{{ student.contact }}
+{% endif %}
+## 申请三维
+
+| 维度 | 内容 |
+| --- | --- |
+| 均分（大一/大二/大三） | {{ student.gpa }} |
+| GPA（4.0 制） | {{ student.gpa4 }} |
+| 语言成绩 | {{ student.lang }} |
+| GRE | {{ student.gre }} |
+
+## 申请结果
+
+| 项目 | 结果 | 提交日期 | 结果日期 | 备注 |
+| --- | --- | --- | --- | --- |
+{%- for application in student.applications %}
+{%- set application = applications[application.row_id] %}
+{%- set program = programs[application.program[0].row_id] %}
+| {{ loop.index }}. {{ program.abbrv | replace("|", "\\|") }} | {{ status_text[application.result] }} | {{ application.submit_date or "" }} | {{ application.result_date or "" }} | {{ (application.note or "") | replace("\n", " ") | replace("|", "\\|") }} |
+{%- endfor %}
+
+{{ student.experience }}
+
+{{ student.sharing }}

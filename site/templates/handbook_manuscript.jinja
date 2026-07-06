@@ -1,0 +1,23 @@
+---
+title: 诺丁汉大学数学系升学指导手册
+subtitle: "{{ subtitle }}"
+author: 诺丁汉数学系飞跃手册项目组
+date: "{{ year }}"
+lang: zh-CN
+---
+
+{{ preface }}
+
+{{ front_matter }}
+{% for body in articles %}
+
+{{ body }}
+{% endfor %}
+{% for term, students in students_by_term.items() %}
+
+# {{ term }} 申请案例
+{% for student in students %}
+
+{% include 'handbook_applicant.jinja' %}
+{% endfor %}
+{% endfor %}

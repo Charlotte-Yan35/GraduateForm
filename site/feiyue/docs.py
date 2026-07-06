@@ -14,6 +14,36 @@ from pypinyin import lazy_pinyin
 WORKING_DIR = Path.cwd()
 
 
+def build_students_by_term(students: dict) -> dict:
+    """Group students by term, sorted by name (Latin names first, then pinyin),
+    terms in descending order. Shared by the MkDocs site and the handbook PDF so
+    案例顺序在两处保持一致。"""
+    students_by_term = defaultdict(list)
+    for student in students.values():
+        students_by_term[student["term"]].append(student)
+
+    def sort_key(value: dict) -> tuple[int, str | list[str]]:
+        name = value["name"]
+        if re.match(r'^[A-Za-z]', name):
+            return 0, name.lower()
+        else:
+            return 1, lazy_pinyin(name)
+
+    return {
+        term: sorted(group, key=sort_key)  # Sort by student name
+        for term, group in sorted(students_by_term.items(), reverse=True)  # Sort by term descending
+    }
+
+
+def load_articles(working_dir: Path) -> list:
+    """Load the 专栏文章 list from data/articles.yaml (single source of truth)."""
+    articles_path = working_dir / "data" / "articles.yaml"
+    if articles_path.exists():
+        with open(articles_path) as f:
+            return yaml.safe_load(f) or []
+    return []
+
+
 def build_pages(records: list[dict], image_links: dict, templates: str, resources: str, output: str) -> None:
     mkdocs = MkDocs(templates, resources, output)
     mkdocs.pre_build(records)
@@ -57,21 +87,7 @@ class MkDocs:
         self.applications = records[3]
 
         # Helper dicts to simplify rendering
-        students_by_term = defaultdict(list)
-        for student in self.students.values():
-            students_by_term[student["term"]].append(student)
-
-        def sort_key(value: dict) -> tuple[int, str | list[str]]:
-            name = value["name"]
-            if re.match(r'^[A-Za-z]', name):
-                return 0, name.lower()
-            else:
-                return 1, lazy_pinyin(name)
-
-        students_by_term = {
-            term: sorted(students, key=sort_key)  # Sort by student name
-            for term, students in sorted(students_by_term.items(), reverse=True)  # Sort by term descending
-        }
+        students_by_term = build_students_by_term(self.students)
 
         universities_by_region = defaultdict(list)
         for university in self.universities.values():
@@ -88,18 +104,11 @@ class MkDocs:
                 university["programs"].sort(key=lambda p: p["display_value"])  # Sort by program abbreviation
 
         # Optional standalone articles (专栏), single source of truth in data/articles.yaml
-        articles_path = WORKING_DIR / "data" / "articles.yaml"
-        articles = []
-        if articles_path.exists():
-            with open(articles_path) as f:
-                articles = yaml.safe_load(f) or []
+        articles = load_articles(WORKING_DIR)
 
         self.env = Environment(loader=FileSystemLoader(self.templates_dir))
         self.env.globals.update({  # Jinja global variables
             "current_year": datetime.now().year,
-            # 仅当 ENABLE_PDF_EXPORT 存在时才在 mkdocs.yml 写入 with-pdf 插件块。
-            # 否则本地无 WeasyPrint 原生库也能正常 mkdocs serve/build(插件在导入时即加载 WeasyPrint)。
-            "pdf_export": bool(os.environ.get("ENABLE_PDF_EXPORT")),
             "articles": articles,
             "universities": self.universities,
             "programs": self.programs,
