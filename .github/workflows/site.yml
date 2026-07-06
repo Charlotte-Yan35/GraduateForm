@@ -17,6 +17,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      ENABLE_PDF_EXPORT: '1'   # 开启整本手册 PDF: 影响 maker(写入 with-pdf 插件块)与 mkdocs 构建(实际生成)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,6 +37,12 @@ jobs:
             mkdocs-material-
       - name: Install dependencies
         run: pip install -r site/requirements.txt
+      - name: Install system libs for PDF export (WeasyPrint + CJK font)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangocairo-1.0-0 libcairo2 \
+            libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk
       - name: Generate pages from Supabase
         working-directory: site
         env:

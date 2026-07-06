@@ -10,6 +10,11 @@
   --md-typeset-a-color:  #009BC1;
 }
 
+/* Download 手册: 顶栏最后一个 tab 推到最右侧, 与 Home…Programs 并排居右 */
+.md-tabs__list > .md-tabs__item:last-child {
+  margin-left: auto;
+}
+
 h1, h2, h3 {
   font-weight: bold !important;
 }

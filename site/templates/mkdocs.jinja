@@ -53,6 +53,19 @@ plugins:
         - en
         - zh
       separator: '[\s\u200b\-,:!=\[\]()"`/@]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+{%- if pdf_export %}
+  # 整本手册 PDF 导出。该块仅在生成 mkdocs.yml 时设了 ENABLE_PDF_EXPORT 才写入,
+  # 因为 with-pdf 插件在导入时即加载 WeasyPrint(需原生库); 本地默认不写, 预览保持快速。
+  - with-pdf:
+      output_path: pdf/nott-maths-feiyue-handbook.pdf
+      cover_title: 诺丁汉大学数学系升学参考平台
+      cover_subtitle: 26 Fall · 飞跃手册
+      author: 诺丁汉数学系飞跃手册
+      copyright: '© {{ current_year }} 诺丁汉数学系飞跃手册. All rights reserved.'
+      toc_title: 目录
+      toc_level: 2
+      enabled_if_env: ENABLE_PDF_EXPORT
+{%- endif %}
 
 markdown_extensions:
   # Python Markdown
@@ -121,3 +134,5 @@ nav:
 {%- endfor %}
 {%- endfor %}
 {%- endfor %}
+  # 整本手册 PDF 下载(外链), 渲染为顶栏最右侧的 tab, 见 extra.css 的 margin-left:auto
+  - Download ⤓: https://phoenizard.github.io/GraduateForm/pdf/nott-maths-feiyue-handbook.pdf

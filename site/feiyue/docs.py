@@ -97,6 +97,9 @@ class MkDocs:
         self.env = Environment(loader=FileSystemLoader(self.templates_dir))
         self.env.globals.update({  # Jinja global variables
             "current_year": datetime.now().year,
+            # 仅当 ENABLE_PDF_EXPORT 存在时才在 mkdocs.yml 写入 with-pdf 插件块。
+            # 否则本地无 WeasyPrint 原生库也能正常 mkdocs serve/build(插件在导入时即加载 WeasyPrint)。
+            "pdf_export": bool(os.environ.get("ENABLE_PDF_EXPORT")),
             "articles": articles,
             "universities": self.universities,
             "programs": self.programs,
