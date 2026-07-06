@@ -1,6 +1,5 @@
 jinja2
 mkdocs-material
-mkdocs-with-pdf
 pypinyin
 requests
 python-dotenv

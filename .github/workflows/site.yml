@@ -17,8 +17,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      ENABLE_PDF_EXPORT: '1'   # 开启整本手册 PDF: 影响 maker(写入 with-pdf 插件块)与 mkdocs 构建(实际生成)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,18 +35,21 @@ jobs:
             mkdocs-material-
       - name: Install dependencies
         run: pip install -r site/requirements.txt
-      - name: Install system libs for PDF export (WeasyPrint + CJK font)
+      - name: Install Pandoc + XeLaTeX + CJK font (for handbook PDF)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libpango-1.0-0 libpangocairo-1.0-0 libcairo2 \
-            libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk
+            pandoc texlive-xetex texlive-lang-chinese \
+            texlive-fonts-recommended fonts-noto-cjk
       - name: Generate pages from Supabase
         working-directory: site
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: python feiyue/maker.py --source cloud
+      - name: Build handbook PDF
+        working-directory: site
+        run: python feiyue/handbook.py --source cache
       - name: Publish site to GitHub Pages
         working-directory: site/output
         run: mkdocs gh-deploy --force
