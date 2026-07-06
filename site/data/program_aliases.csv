@@ -14,13 +14,13 @@ Carnegie Mellon University (CMU),MSBA,CMU Master of Science in Business Analytic
 Carnegie Mellon University (CMU),Business Intelligence and Data Analytics ,CMU Master of Science in Information Technology (Business Intelligence & Data Analytics)
 Carnegie Mellon University (CMU),MS Machine Learning ,CMU Master's in Machine Learning
 Carnegie Mellon University (CMU),MS Data Analytics for Science,CMU MS in Data Analytics for Science
-Columbia University,,Columbia University
+Columbia University,,-
 Columbia University,MS in Statistics,Columbia University MA Statistics program
 Columbia University,statistic,Columbia University MA Statistics program
 Columbia University,MA in Statistics ,Columbia University MA Statistics program
 Columbia University,MS in Biostatistics,Columbia University MS in Biostatistics
 Columbia University,MS in Data Science,Columbia University MS in Data Science
-Cornell University-tech campus,Data Science and Decision Analytics ,Cornell MSc Data Science and Decision Analytics
+Cornell University-tech campus,Data Science and Decision Analytics ,Cornell Tech Master of Engineering in Data Science & Decision Analytics
 Cornell University,MEng in Operations Research and Information Engineering,Cornell Tech Master in Operations Research and Information Engineering
 Cornell University,Master in Operations Research and Information Engineering,Cornell Tech Master in Operations Research and Information Engineering
 Cornell University,MS in Data Science and Decision Analytics ,Cornell Tech Master of Engineering in Data Science & Decision Analytics
@@ -61,7 +61,7 @@ The University of Hong Kong (HKU),Master of Statistics,HKU Master of Statistics 
 香港大学,MSc in Statistics,HKU Master of Statistics (MStat)
 The Hong Kong University of Science and Technology (HKUST),MAED,HKUST Master of Science in Mathematics for Educators (MAED)
 The Hong Kong University of Science and Technology (HKUST),MS in Data Driven Modelling,HKUST MSc in Data Driven Modelling
-Imperial College London,MSc in Artificial Intelligence Applications and Innovation,ICL Artificial Intelligence Applications and Innovation MSc
+Imperial College London,MSc in Artificial Intelligence Applications and Innovation,Imperial College London Artificial Intelligence Applications and Innovation MSc
 Imperial College London,ACSE,Imperial College London Applied Computational Science and Engineering MSc
 Imperial College London,MSc in Applied Computational Science and Engineering,Imperial College London Applied Computational Science and Engineering MSc
 Imperial College London,MSc Applied Computational Science and Engineering ,Imperial College London Applied Computational Science and Engineering MSc
@@ -82,9 +82,9 @@ Imperial College London,Applied mathematics ,Imperial College London MSc in Appl
 Imperial College London,Msc in Applied Math,Imperial College London MSc in Applied Mathematics
 Imperial College London,MSc in Statistic,Imperial College London MSc in Statistics
 Imperial College London,MSc Financial Statistics,Imperial College London Statistics (Statistical Finance) MSc
-Johns Hopkins University,M.S.E. program in Data Science,Johns Hopkins University  Master's in Data Science
-Johns Hopkins University,Data Science,Johns Hopkins University  Master's in Data Science
-Johns Hopkins University,ds,Johns Hopkins University  Master's in Data Science
+Johns Hopkins University,M.S.E. program in Data Science,Johns Hopkins University Master's in Data Science
+Johns Hopkins University,Data Science,Johns Hopkins University Master's in Data Science
+Johns Hopkins University,ds,Johns Hopkins University Master's in Data Science
 Johns Hopkins University,system,Johns Hopkins University MS in Systems Engineering
 Johns Hopkins University,applied mathematics&statistics,Johns Hopkins University MSE in Applied Mathematics and Statistics
 Johns Hopkins University,Applied mathematics and statistics ,Johns Hopkins University MSE in Applied Mathematics and Statistics
@@ -175,7 +175,6 @@ University College London (UCL),MSc Venture Capital and Private Equity with Fina
 University of Georgia,Mechanical Engineering (PHD),UGA Mechanical Engineering (PHD)
 University of Illinois Urbana-Champaign (UIUC),ds,UIUC Master of Computer Science in Data Science
 University of Illinois Urbana-Champaign (UIUC),PhD in Computer Science,UIUC PhD in Computer Science
-University College London (UCL),,University College London
 University of Bristol,MSc in Data Science,University of Bristol MSc in Data Science
 University of Bristol,MSc in Mathematics,University of Bristol MSc Mathematical Sciences
 University of Cambridge,Applied Mathematics Part 3,University of Cambridge MASt in Mathematics (Applied Mathematics)
@@ -206,7 +205,7 @@ University of Edinburgh,Data Science,University of Edinburgh MSc Data Science
 University of Edinburgh,MSc in Artificial Intelligence,University of Edinburgh MSc in Artificial Intelligence
 University of Edinburgh,MSc Operational Research with Data Science ,University of Edinburgh MSc Operational Research with Data Science
 University of Edinburgh,MSc in Operational Research with Data Science,University of Edinburgh MSc Operational Research with Data Science
-University of Edinburgh,Msc Statistics and Data Science,University of Edinburgh MSc Statistics and Data Science
+University of Edinburgh,Msc Statistics and Data Science,University of Edinburgh MSc Statistics with Data Science
 University of Edinburgh,MSc Statistics and Operational Research,University of Edinburgh MSc Statistics and Operational Research
 University of Edinburgh,MSc in Statistics with Data Science,University of Edinburgh MSc Statistics with Data Science
 University of Edinburgh,MSc Statistics with Data Science,University of Edinburgh MSc Statistics with Data Science
@@ -215,7 +214,7 @@ University of Leeds,MSc Mathematics,University of Leeds MSc Mathematics
 University of Manchester,MSc in Data Science,University of Manchester MSc Data Science
 University of Manchester,Msc Data Science,University of Manchester MSc Data Science
 University of Manchester,digital marketing,University of Manchester MSc Digital Marketing
-University of Manchester,hds,University of Manchester MSc hds
+University of Manchester,hds,University of Manchester MSc Health Data Science
 University of Manchester,MSc in Advance Computer Science,University of Manchester MSc in Advanced Computer Science
 University of Manchester,MSc in Artificial Intelligence,University of Manchester MSc in Artificial Intelligence
 University of Manchester,MSc in Machine Learning,University of Manchester MSc in Machine Learning
@@ -225,7 +224,7 @@ University of Manchester,MSc Statistics,University of Manchester MSc Statistics
 "University of Maryland, College Park",MSc in Artificial Intelligence,"University of Maryland, College Park MSc in Artificial Intelligence"
 "University of Maryland, College Park",PhD in Computer Science,"University of Maryland, College Park PhD in Computer Science"
 University of Melbourne,Master of Biostatistics,University of Melbourne Master of Biostatistics
-"University of Michigan, Ann Arbor",Data Science,"University of Michigan, Ann Arbor  Master’s in Data Science"
+"University of Michigan, Ann Arbor",Data Science,"University of Michigan, Ann Arbor Master's in Data Science"
 "University of Michigan, Ann Arbor",Applied statistics ,"University of Michigan, Ann Arbor Applied Statistics Master's Program"
 "University of Michigan, Ann Arbor",Applied Statistics Master,"University of Michigan, Ann Arbor Applied Statistics Master's Program"
 "University of Michigan, Ann Arbor",MS in biostatistics,"University of Michigan, Ann Arbor Master of Science (MS) in Biostatistics"
@@ -287,3 +286,4 @@ Columbia University,Msc in Statistics,Columbia University MA Statistics program
 New York University (NYU),Urban Data science,NYU MS in Applied Urban Science and Informatics
 University College London (UCL),marketing science,UCL Marketing MSc
 University of Oxford,MSc in mathematics,University of Oxford MSc in Mathematical Sciences (OMMS)
+University College London (UCL),,-

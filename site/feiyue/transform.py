@@ -136,7 +136,9 @@ class Deriver:
 
     def _ensure_program_node(self, info: dict, canonical: str, degree_codes: list) -> str:
         """以 canonical 全名为 identity 建/取 program 节点, 挂到 info 对应的 University。
-        canonical 即展示名(program.abbrv); 相同 canonical → 同一节点(正确合并)。"""
+        canonical 即展示名(program.abbrv); 相同 canonical → 同一节点(正确合并)。
+        先做确定性清洗(压缩空白/统一撇号), 避免仅不可见字节不同的写法分裂成两个节点。"""
+        canonical = normalize.clean_canonical(canonical)
         u_id = _hash_id("u", info["name"])
         p_id = _hash_id("p", canonical)
         if u_id not in self.universities:
@@ -161,6 +163,8 @@ class Deriver:
             self.skipped_schools += 1
             return None
         canonical = self.prognorm.lookup(raw_school, raw_project)
+        if canonical == "-":  # 人工标记: 无效条目(如只填学校未填项目), 丢弃, 不建 program 节点
+            return None
         if canonical is None:
             # 未编纂(新提交): 回退旧式 school_abbrv + 项目 拼接, 不阻断构建; 已记待补全
             project = normalize.normalize_project(raw_project)
@@ -179,7 +183,7 @@ class Deriver:
         if not entry:
             self.unresolved_dest += 1
             return None
-        canonical = entry["canonical"]
+        canonical = normalize.clean_canonical(entry["canonical"])  # 与 _ensure_program_node 同一清洗, 保证 p_id 一致
         p_id = _hash_id("p", canonical)
         if p_id not in self.programs:
             info = self.norm.normalize(entry["school"])

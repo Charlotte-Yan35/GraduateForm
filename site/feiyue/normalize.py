@@ -11,6 +11,7 @@
 
 import csv
 import re
+import unicodedata
 from pathlib import Path
 
 # 相对本文件: site/feiyue/normalize.py -> 仓库根
@@ -242,6 +243,20 @@ _LEVEL_PATTERNS = [
     (r"\bm\.?sc\b|\bmaster of science\b|\bmsci\b|硕士", "MSc"),
     (r"\bmaster\b|\bms\b|\bms[c]?\b", "MSc"),
 ]
+
+
+def clean_canonical(name: str) -> str:
+    """项目 canonical 展示名 = identity 键前的确定性清洗(非模糊匹配)。
+
+    人工编纂的 canonical 直接当作 program 去重 identity(见 transform._ensure_program_node),
+    因此同一项目若被写成仅『不可见字节』不同的两种形式(如双空格、花体撇号 ’ vs 直撇号 '),
+    会被哈希成两个节点、在站点上重复出现。这里做统一的确定性清洗:NFKC 归一 + 花体引号转直引号
+    + 压缩内部空白 + trim。不改动任何可见词汇,不做 token/模糊合并。"""
+    s = unicodedata.normalize("NFKC", name or "")
+    s = s.replace("’", "'").replace("‘", "'")  # ’ ‘ -> '
+    s = s.replace("“", '"').replace("”", '"')  # “ ” -> "
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
 
 def normalize_project(raw_project: str) -> str:
