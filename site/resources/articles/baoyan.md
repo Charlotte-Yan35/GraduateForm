@@ -101,4 +101,4 @@ hide:
 
 ---
 
-如果你愿意分享自己的保研经历，欢迎通过项目仓库 <a href="https://github.com/Phoenizard/GraduateForm" target="_blank">:material-github:Phoenizard/GraduateForm:octicons-arrow-up-right-24:</a> 联系我们。
+如果你愿意分享自己的保研经历，欢迎通过项目仓库 <a href="https://github.com/Charlotte-Yan35/GraduateForm" target="_blank">:material-github:Charlotte-Yan35/GraduateForm:octicons-arrow-up-right-24:</a> 联系我们。

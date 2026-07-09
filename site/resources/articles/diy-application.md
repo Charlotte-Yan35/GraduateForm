@@ -11,4 +11,4 @@ hide:
 
     本页为占位示例。后续将整理数学/统计系 DIY 申请同学的实战经验陆续发布于此。
 
-    如果你愿意分享自己的 DIY 经历，欢迎通过项目仓库 <a href="https://github.com/Phoenizard/GraduateForm" target="_blank">:material-github:Phoenizard/GraduateForm:octicons-arrow-up-right-24:</a> 联系我们。
+    如果你愿意分享自己的 DIY 经历，欢迎通过项目仓库 <a href="https://github.com/Charlotte-Yan35/GraduateForm" target="_blank">:material-github:Charlotte-Yan35/GraduateForm:octicons-arrow-up-right-24:</a> 联系我们。

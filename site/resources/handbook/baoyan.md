@@ -92,4 +92,4 @@
 
 ---
 
-如果你愿意分享自己的保研经历，欢迎通过项目仓库 Phoenizard/GraduateForm（github.com/Phoenizard/GraduateForm）联系我们。
+如果你愿意分享自己的保研经历，欢迎通过项目仓库 Charlotte-Yan35/GraduateForm（github.com/Charlotte-Yan35/GraduateForm）联系我们。

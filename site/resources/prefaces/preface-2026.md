@@ -13,7 +13,7 @@ hide:
 
     本平台**仅展示用户在问卷中明确同意公开的信息**。联系方式仅对选择「愿意公开」的同学展示；个人经历与申请分享也均遵循填写者的意愿。姓名一栏为同学自填的代号或缩写。
 
-平台数据会随问卷的新提交持续更新——每次重建都会自动并入最新的已提交记录。如果你发现信息有误，或有更好的改进建议，欢迎通过项目仓库 <a href="https://github.com/Phoenizard/GraduateForm" target="_blank">:material-github:Phoenizard/GraduateForm:octicons-arrow-up-right-24:</a> 反馈。
+平台数据会随问卷的新提交持续更新——每次重建都会自动并入最新的已提交记录。如果你发现信息有误，或有更好的改进建议，欢迎通过项目仓库 <a href="https://github.com/Charlotte-Yan35/GraduateForm" target="_blank">:material-github:Charlotte-Yan35/GraduateForm:octicons-arrow-up-right-24:</a> 反馈。
 
 衷心感谢每一位愿意分享申请经历的数学系同学。你现在看到的每一个案例，背后都是一段漫长而真实的申请历程。愿这些案例能在你选校时提供参考，在焦虑时给予信心。
 
